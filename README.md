@@ -55,7 +55,7 @@ Replace `<your_raspberry_pi_ip>` with the actual IP address of your Raspberry Pi
 *   Check the Dockwatch container logs for errors: `docker logs dockwatch`.
 
 ## Script Contents (`full_setup.sh`)
-
+```
 #!/bin/bash
 
 # --- User Input ---
@@ -132,7 +132,7 @@ fi
 
 # Remove xscreensaver
 sudo apt remove -y xscreensaver
-
+```
 echo "Kiosk setup complete."
 echo "Rebooting in 5 seconds..."
 sleep 5
