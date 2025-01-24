@@ -42,6 +42,44 @@ This script configures a Raspberry Pi (running Raspbian Lite or similar) to boot
 
 ## Script Contents (`setup_kiosk.sh`)
 
+
+
+
+
+
+
+
+# Install Docker, Docker Compose, and Dockwatch on Raspberry Pi
+
+This script automates the installation of Docker, Docker Compose, and Dockwatch (as a Docker container) on a Raspberry Pi running Raspbian Lite (or similar Debian-based distributions).
+
+## Prerequisites
+
+*   A Raspberry Pi running Raspbian Lite (or a similar Debian-based OS).
+*   Internet connectivity.
+*   SSH access to the Raspberry Pi (recommended).
+
+## Usage
+
+1.  Save the script to a file (e.g., `install_docker_dockwatch.sh`).
+2.  Make the script executable: `chmod +x install_docker_dockwatch.sh`.
+3.  Run the script with sudo: `sudo ./install_docker_dockwatch.sh`.
+
+## What the script does
+
+*   Updates the package lists.
+*   Installs necessary dependencies for Docker.
+*   Adds Docker's official GPG key and repository.
+*   Installs Docker Engine, containerd, and Docker Compose.
+*   Adds the current user to the `docker` group (so you don't need `sudo` for `docker` commands).
+*   Verifies the Docker installation with `docker run hello-world`.
+*   Installs Dockwatch as a Docker container, exposing it on port 8080.
+*   Prints instructions on how to access Dockwatch.
+
+## Accessing Dockwatch
+
+After the script completes and the Raspberry Pi reboots (if you rebooted), you can access Dockwatch by opening a web browser and navigating to:
+
 ```bash
 #!/bin/bash
 # ... (The full script code goes here)
