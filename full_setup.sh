@@ -8,10 +8,13 @@ KIOSK_URL="http://localhost:9876" # The URL to display in the kiosk
 # Update package lists
 sudo apt update
 
-# Install Docker dependencies
-sudo apt install -y apt-transport-https ca-certificates curl gnupg lsb-release
+# Install dependencies
+sudo apt install -y apt-transport-https ca-certificates curl gnupg lsb-release git unzip
 
-# Add Docker's official GPG key
+# Set timezone
+sudo timedatectl set-timezone America/Chicago
+
+# Install Docker dependencies
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 
 # Set up the stable repository
@@ -32,17 +35,50 @@ newgrp docker
 # Verify Docker installation
 docker run hello-world
 
+# Create Docker volume directories
+sudo mkdir -p /home/docker/dockwatch
+sudo mkdir -p /home/docker/posterr
+
 # Install Dockwatch as a Docker container
 docker run -d \
   --name dockwatch \
   --restart always \
   -p 8080:8080 \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  -v dockwatch_data:/config \
+  -v /home/docker/dockwatch:/config \
   ghcr.io/notifiarr/dockwatch:latest
 
 echo "Docker, Docker Compose, and Dockwatch have been installed."
 echo "Dockwatch is accessible at http://<your_raspberry_pi_ip>:8080"
+
+# Install Posterr
+git clone https://github.com/petersem/posterr /tmp/posterr
+cd /tmp/posterr
+unzip posterr-linux-armv7.zip
+sudo mv posterr-linux-armv7 /opt/posterr
+sudo chown -R root:root /opt/posterr
+sudo chmod +x /opt/posterr/posterr
+
+# Create a systemd service for Posterr
+sudo cat << EOF | sudo tee /etc/systemd/system/posterr.service
+[Unit]
+Description=Posterr Service
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/posterr
+ExecStart=/opt/posterr/posterr
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable and start the Posterr service
+sudo systemctl daemon-reload
+sudo systemctl enable posterr.service
+sudo systemctl start posterr.service
 
 # Install Kiosk dependencies
 sudo apt install -y xorg matchbox-window-manager lightdm chromium-browser unclutter
@@ -63,19 +99,4 @@ cat << EOF | sudo tee /home/"$USERNAME"/.config/lxsession/LXDE-pi/autostart
 EOF
 
 # Disable screen blanking (alternative method using xorg.conf.d - if the xset method above isn't sufficient)
-if [ ! -f /etc/X11/xorg.conf.d/99-screensaver.conf ]; then
-cat << EOF | sudo tee /etc/X11/xorg.conf.d/99-screensaver.conf
-Section "Device"
-    Identifier "Screen0"
-    Option "DPMS" "false"
-EndSection
-EOF
-fi
-
-# Remove xscreensaver
-sudo apt remove -y xscreensaver
-
-echo "Kiosk setup complete."
-echo "Rebooting in 5 seconds..."
-sleep 5
-sudo reboot
+if [ ! -f /etc
